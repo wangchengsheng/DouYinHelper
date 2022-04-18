@@ -67,6 +67,12 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
     }
 
     private suspend fun actionUserProfile() {
+        val horScroll = action { nodeInfo.findId("com.ss.android.ugc.aweme:id/n4w") }
+        try {
+            action { horScroll.getChild(0).click() } // 点击作品
+        } catch (e: Exception) {
+            log(e.message)
+        }
         val type = action {
             val noVideo = nodeInfo.hasText("作品 0")
             val privacy = nodeInfo.hasText("关注帐号即可查看内容和喜欢")
