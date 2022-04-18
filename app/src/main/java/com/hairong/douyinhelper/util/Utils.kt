@@ -26,7 +26,8 @@ fun startAccessibilitySettings() {
  * 无障碍是否开启
  */
 fun isAccessibilitySettingsOn(): Boolean {
-    val serviceName = "${appContext.packageName}/com.hairong.douyinhelper.helper.DouYinHelperService"
+    val serviceName =
+        "${appContext.packageName}/com.hairong.douyinhelper.helper.DouYinHelperService"
     val string = Settings.Secure.getString(
         appContext.contentResolver,
         Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
@@ -97,5 +98,17 @@ fun AccessibilityNodeInfo?.scrollForward() =
 fun AccessibilityNodeInfo?.setText(text: String): Boolean {
     this ?: return false
     val bundle = bundleOf(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE to text)
-    return this.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle) ?: false
+    return try {
+        this.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle)
+    } catch (e: Exception) {
+        false
+    }
+}
+
+fun getAppVersionName(packageName: String = "com.ss.android.ugc.aweme"): String = try {
+    val pm = appContext.packageManager
+    val pi = pm.getPackageInfo(packageName, 0)
+    pi.versionName
+} catch (e: Exception) {
+    ""
 }

@@ -12,22 +12,46 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.hairong.douyinhelper.data.configData
+import com.hairong.douyinhelper.util.getAppVersionName
 import com.hairong.douyinhelper.util.isAccessibilitySettingsOn
 import com.hairong.douyinhelper.util.startAccessibilitySettings
 
 @Composable
 fun MainPage(show: (Int) -> Unit) {
+    var douYinVersion by remember { mutableStateOf("") }
     var enabled by remember { mutableStateOf(isAccessibilitySettingsOn()) }
     val owner = LocalLifecycleOwner.current
     DisposableEffect(owner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 enabled = isAccessibilitySettingsOn()
+                douYinVersion = getAppVersionName()
             }
         }
         owner.lifecycle.addObserver(observer)
         onDispose { owner.lifecycle.removeObserver(observer) }
     }
+    val needVersion = "20.4.0"
+    if (douYinVersion != needVersion) {
+        NotSupport(douYinVersion, needVersion)
+    } else {
+        Content(enabled, show)
+    }
+}
+
+@Suppress("SameParameterValue")
+@Composable
+private fun NotSupport(douYinVersion: String, needVersion: String) {
+    Box(Modifier.fillMaxSize(), Alignment.Center) {
+        Text(
+            text = "当前抖音版本 $douYinVersion 不支持\n请下载抖音版本 $needVersion",
+            style = MaterialTheme.typography.h5
+        )
+    }
+}
+
+@Composable
+private fun Content(enabled: Boolean, show: (Int) -> Unit) {
     Scaffold(Modifier.fillMaxSize()) {
         Column(
             Modifier
@@ -36,6 +60,11 @@ fun MainPage(show: (Int) -> Unit) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Text(
+                text = "建议关闭应用市场App自动更新功能",
+                style = MaterialTheme.typography.h5,
+                color = MaterialTheme.colors.error
+            )
             AccessibilityState(enabled)
             Spacer(modifier = Modifier.size(12.dp))
             ActionTime()

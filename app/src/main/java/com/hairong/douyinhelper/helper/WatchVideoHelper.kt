@@ -32,7 +32,7 @@ class WatchVideoHelper(service: DouYinHelperService) : BaseHelper(service) {
 
     private suspend fun search() {
         action {
-            nodeInfo.findId("com.ss.android.ugc.aweme:id/eo8").click()
+            nodeInfo.findId("com.ss.android.ugc.aweme:id/eso").click()
                 .also { if (!it) log("请回到首页") else log("开始搜索关键字") }
         }
         delay(3000)
@@ -41,14 +41,14 @@ class WatchVideoHelper(service: DouYinHelperService) : BaseHelper(service) {
                 .setText(watchVideoBean.searchKey)
         }
         action {
-            nodeInfo.findId("com.ss.android.ugc.aweme:id/py+").gestureClick()
+            nodeInfo.findId("com.ss.android.ugc.aweme:id/p=_").gestureClick()
         }
         log("搜索成功")
         action {
             val list = nodeInfo?.findAccessibilityNodeInfosByViewId("android:id/text1")
             list?.firstOrNull { it.text == "视频" }?.parent.click()
         }
-        action { nodeInfo.findId("com.ss.android.ugc.aweme:id/l16").click() }
+        action { nodeInfo.findId("com.ss.android.ugc.aweme:id/l=a").click() }
         log("开始浏览视频")
     }
 
@@ -67,8 +67,8 @@ class WatchVideoHelper(service: DouYinHelperService) : BaseHelper(service) {
         log("关注主播")
         action { nodeInfo.findId("com.ss.android.ugc.aweme:id/user_avatar").click() }
         val followType = action {
-            val no = nodeInfo.findId("com.ss.android.ugc.aweme:id/k05")
-            val yes = nodeInfo.findId("com.ss.android.ugc.aweme:id/k06")
+            val no = nodeInfo.findId("com.ss.android.ugc.aweme:id/k8u")
+            val yes = nodeInfo.findId("com.ss.android.ugc.aweme:id/k8v")
             when {
                 no != null -> 1 to no
                 yes != null -> 2 to null
@@ -99,9 +99,9 @@ class WatchVideoHelper(service: DouYinHelperService) : BaseHelper(service) {
             watchVideoBean.commentList[Random.nextInt(watchVideoBean.commentList.size)]
         }
         action {
-            nodeInfo.findId("com.ss.android.ugc.aweme:id/cbv").setText(text)
+            nodeInfo.findId("com.ss.android.ugc.aweme:id/cc4").setText(text)
         }
-        action { nodeInfo.findId("com.ss.android.ugc.aweme:id/cc7").click() }
+        action { nodeInfo.findId("com.ss.android.ugc.aweme:id/cea").click() }
         log("评论成功")
         delay(2000)
     }

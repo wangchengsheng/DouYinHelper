@@ -22,7 +22,7 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
     }
 
     private suspend fun followRv() = action {
-        nodeInfo.findId("com.ss.android.ugc.aweme:id/l5o").also {
+        nodeInfo.findId("com.ss.android.ugc.aweme:id/l+z").also {
             if (it == null) {
                 log("请手动打开指定作者粉丝页")
             } else {
@@ -44,7 +44,7 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
                 rv.getChild(index)
             }
         }
-        val text = action { item.findId("com.ss.android.ugc.aweme:id/a7b")?.text?.toString() }
+        val text = action { item.findId("com.ss.android.ugc.aweme:id/a71")?.text?.toString() }
         when {
             index >= rv.childCount - 1 -> {
                 if (action { rv.scrollForward() }) {
@@ -70,7 +70,7 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
             val noVideo = nodeInfo.hasText("作品 0")
             val privacy = nodeInfo.hasText("关注帐号即可查看内容和喜欢")
             val banUser = nodeInfo.hasText("帐号已被封禁")
-            val hasVideo = nodeInfo.findId("com.ss.android.ugc.aweme:id/inx")
+            val hasVideo = nodeInfo.findId("com.ss.android.ugc.aweme:id/iu6")
             when {
                 hasVideo != null -> 1 to hasVideo
                 noVideo -> 2 to null
@@ -106,7 +106,7 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
     private suspend fun followUser(type: Int) {
         delay(1000)
         log("关注用户")
-        val follow = action { nodeInfo.findId("com.ss.android.ugc.aweme:id/k05") }
+        val follow = action { nodeInfo.findId("com.ss.android.ugc.aweme:id/k8u") }
         if (follow.text.toString() == "关注") {
             if (action { follow.click() }) {
                 index++
@@ -140,22 +140,22 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
         delay(8000)
         // 点赞
         log("开始点赞")
-        val node1 = action { nodeInfo.findId("com.ss.android.ugc.aweme:id/c_v") }
+        val node1 = action { nodeInfo.findId("com.ss.android.ugc.aweme:id/c+p") }
         if (node1.hasText("未点赞")) {
             action { node1.click() }
         }
         // 评论
         log("评论")
-        action { nodeInfo.findId("com.ss.android.ugc.aweme:id/cd-").click() }
+        action { nodeInfo.findId("com.ss.android.ugc.aweme:id/cff").click() }
         delay(2000)
         action {
-            val edit = nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cbv")
+            val edit = nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cc4")
             val bundle =
                 bundleOf(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE to followBean.comment)
             edit?.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle) ?: false
         }
         delay(2000)
-        action { nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cc7").click() }
+        action { nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cea").click() }
         log("评论成功")
         action { back() }
         action { back() }
