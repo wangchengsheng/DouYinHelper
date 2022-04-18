@@ -35,7 +35,7 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
      * 找到需要关注的item
      */
     private suspend fun actionItem(rv: AccessibilityNodeInfo) {
-        val item = action {
+        val item = action(1200000) {
             if (rv.childCount <= 0) {
                 log("列表为空，正在刷新")
                 rv.refresh()
@@ -49,6 +49,7 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
             index >= rv.childCount - 1 -> {
                 if (action { rv.scrollForward() }) {
                     index = 0
+                    delay(5000)
                     actionItem(rv)
                 }
             }

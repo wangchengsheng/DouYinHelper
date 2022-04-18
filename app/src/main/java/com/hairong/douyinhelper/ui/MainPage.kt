@@ -45,7 +45,7 @@ private fun NotSupport(douYinVersion: String, needVersion: String) {
     Box(Modifier.fillMaxSize(), Alignment.Center) {
         Text(
             text = "当前抖音版本 $douYinVersion 不支持\n请下载抖音版本 $needVersion",
-            style = MaterialTheme.typography.h5
+            style = MaterialTheme.typography.h6
         )
     }
 }
@@ -62,7 +62,7 @@ private fun Content(enabled: Boolean, show: (Int) -> Unit) {
         ) {
             Text(
                 text = "建议关闭应用市场App自动更新功能",
-                style = MaterialTheme.typography.h5,
+                style = MaterialTheme.typography.h6,
                 color = MaterialTheme.colors.error
             )
             AccessibilityState(enabled)
