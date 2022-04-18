@@ -67,13 +67,11 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
     }
 
     private suspend fun actionUserProfile() {
-        val horScroll = action { nodeInfo.findId("com.ss.android.ugc.aweme:id/n4w") }
-        try {
-            action { horScroll.getChild(0).click() } // 点击作品
-        } catch (e: Exception) {
-            log(e.message)
-        }
         val type = action {
+            // 针对进来不是选中作品的情况
+            nodeInfo.findId("com.ss.android.ugc.aweme:id/n4w")?.let {
+                if (it.childCount > 0) it.getChild(0).click() // 选中作品
+            }
             val noVideo = nodeInfo.hasText("作品 0")
             val privacy = nodeInfo.hasText("关注帐号即可查看内容和喜欢")
             val banUser = nodeInfo.hasText("帐号已被封禁")
