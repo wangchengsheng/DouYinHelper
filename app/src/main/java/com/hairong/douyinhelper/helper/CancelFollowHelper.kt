@@ -19,9 +19,9 @@ class CancelFollowHelper(service: DouYinHelperService) : BaseHelper(service) {
     private suspend fun followRv() = action {
         nodeInfo.findId("com.ss.android.ugc.aweme:id/l+z").also {
             if (it == null) {
-                log("请手动打开粉丝页")
+                log("请手动打开我的关注页")
             } else {
-                log("当前是粉丝页面")
+                log("当前是关注页面")
             }
         }
     }
@@ -30,7 +30,7 @@ class CancelFollowHelper(service: DouYinHelperService) : BaseHelper(service) {
      * 找到需要关注的item
      */
     private suspend fun actionItem(rv: AccessibilityNodeInfo) {
-        val item = action(1200000) {
+        val item = action {
             if (rv.childCount <= 0) {
                 log("列表为空，正在刷新")
                 rv.refresh()
@@ -41,20 +41,22 @@ class CancelFollowHelper(service: DouYinHelperService) : BaseHelper(service) {
         }
         if (index >= rv.childCount - 1 && action { rv.scrollForward() }) {
             index = 0
-            delay(5000)
-            actionItem(rv)
-        }
-        when (action { item.findId("com.ss.android.ugc.aweme:id/a71")?.text?.toString() }) {
-            "已关注", "已请求" -> {
-                if (action { item.findId("com.ss.android.ugc.aweme:id/qlc").click() }) {
+            delay(3000)
+        } else {
+            when (action { item.findId("com.ss.android.ugc.aweme:id/a71")?.text?.toString() }) {
+                "已关注", "已请求" -> {
+                    log("正在取消")
+                    if (action { item.findId("com.ss.android.ugc.aweme:id/qlc").click() }) {
+                        log("已取消")
+                        index++
+                        actionItem(rv)
+                    }
+                }
+                else -> {
+                    log("跳过互相关注")
                     index++
                     actionItem(rv)
                 }
-            }
-            else -> {
-                log("跳过互相关注")
-                index++
-                actionItem(rv)
             }
         }
     }
