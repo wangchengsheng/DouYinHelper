@@ -14,6 +14,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.hairong.douyinhelper.data.configData
 import com.hairong.douyinhelper.util.getAppVersionName
 import com.hairong.douyinhelper.util.isAccessibilitySettingsOn
+import com.hairong.douyinhelper.util.launchApp
 import com.hairong.douyinhelper.util.startAccessibilitySettings
 
 @Composable
@@ -73,6 +74,9 @@ private fun Content(enabled: Boolean, show: (Int) -> Unit) {
             }
             Button(onClick = { show(1) }, enabled = enabled) {
                 Text(text = "浏览视频")
+            }
+            Button(onClick = { show(2) }, enabled = enabled) {
+                Text(text = "取消关注")
             }
         }
     }

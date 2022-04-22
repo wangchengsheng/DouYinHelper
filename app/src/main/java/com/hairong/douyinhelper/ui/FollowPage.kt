@@ -20,7 +20,7 @@ import com.hairong.douyinhelper.util.launchApp
  * 关注、吸粉
  */
 @Composable
-fun ConcernPage(back: () -> Unit) {
+fun FollowPage(back: () -> Unit) {
     Scaffold(Modifier.fillMaxSize(), topBar = { TopBar(back) }) {
         Column(
             Modifier

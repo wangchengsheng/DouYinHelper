@@ -71,6 +71,7 @@ class DouYinHelperService : AccessibilityService() {
         helper = when (configData.type) {
             0 -> FollowHelper(this)
             1 -> WatchVideoHelper(this)
+            2 -> CancelFollowHelper(this)
             else -> FollowHelper(this)
         }
     }

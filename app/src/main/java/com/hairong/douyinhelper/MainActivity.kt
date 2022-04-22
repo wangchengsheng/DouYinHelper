@@ -10,7 +10,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.hairong.douyinhelper.data.configData
-import com.hairong.douyinhelper.ui.ConcernPage
+import com.hairong.douyinhelper.ui.CancelFollowPage
+import com.hairong.douyinhelper.ui.FollowPage
 import com.hairong.douyinhelper.ui.MainPage
 import com.hairong.douyinhelper.ui.WatchVideoPage
 import com.hairong.douyinhelper.ui.theme.DouYinHelperTheme
@@ -28,10 +29,13 @@ class MainActivity : ComponentActivity() {
                     configData.type = it
                 }
                 AnimatedVisibility(visible = showType == 0, enter = fadeIn(), exit = fadeOut()) {
-                    ConcernPage { showType = -1 }
+                    FollowPage { showType = -1 }
                 }
                 AnimatedVisibility(visible = showType == 1, enter = fadeIn(), exit = fadeOut()) {
                     WatchVideoPage { showType = -1 }
+                }
+                AnimatedVisibility(visible = showType == 2, enter = fadeIn(), exit = fadeOut()) {
+                    CancelFollowPage { showType = -1 }
                 }
             }
         }
