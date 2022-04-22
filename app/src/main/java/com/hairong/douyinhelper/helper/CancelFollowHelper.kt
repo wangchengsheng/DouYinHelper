@@ -1,9 +1,7 @@
 package com.hairong.douyinhelper.helper
 
 import android.view.accessibility.AccessibilityNodeInfo
-import androidx.core.os.bundleOf
-import com.hairong.douyinhelper.data.configData
-import com.hairong.douyinhelper.data.followBean
+import com.hairong.douyinhelper.data.cancelFollowBean
 import com.hairong.douyinhelper.util.*
 import kotlinx.coroutines.delay
 
@@ -43,21 +41,35 @@ class CancelFollowHelper(service: DouYinHelperService) : BaseHelper(service) {
             index = 0
             delay(3000)
         } else {
-            when (action { item.findId("com.ss.android.ugc.aweme:id/a71")?.text?.toString() }) {
-                "已关注", "已请求" -> {
-                    log("正在取消")
-                    if (action { item.findId("com.ss.android.ugc.aweme:id/qlc").click() }) {
-                        log("已取消")
-                        index++
-                        actionItem(rv)
-                    }
-                }
-                else -> {
-                    log("跳过互相关注")
-                    index++
-                    actionItem(rv)
+            if (cancelFollowBean.type == 0) {
+                actionCancel(item, rv)
+            }
+            val text = action { item.findId("com.ss.android.ugc.aweme:id/a71")?.text?.toString() }
+            if (cancelFollowBean.type == 0 && text != "关注" && text != "回关") {
+                actionCancel(item, rv)
+            } else if (cancelFollowBean.type == 1 && text != "互相关注") {
+                actionCancel(item, rv)
+            } else {
+                log("跳过互相关注")
+                index++
+                actionItem(rv)
+            }
+        }
+    }
+
+    private suspend fun actionCancel(item: AccessibilityNodeInfo, rv: AccessibilityNodeInfo) {
+        log("正在取消")
+        if (action { item.findId("com.ss.android.ugc.aweme:id/qlc").click() }) {
+            if (cancelFollowBean.type == 0) {
+                try {
+                    // 回关取消无弹窗
+                    action(5000) { nodeInfo.findId("com.ss.android.ugc.aweme:id/a6c").click() }
+                } catch (e: Exception) {
                 }
             }
+            log("已取消")
+            index++
+            actionItem(rv)
         }
     }
 

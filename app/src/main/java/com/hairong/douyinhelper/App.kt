@@ -12,6 +12,7 @@ class App : Application() {
         configData = ConfigData()
         followBean = FollowBean()
         watchVideoBean = WatchVideoBean()
+        cancelFollowBean = CancelFollowBean()
     }
 }
 

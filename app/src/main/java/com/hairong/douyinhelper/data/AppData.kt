@@ -12,3 +12,4 @@ lateinit var configData: ConfigData
 
 lateinit var followBean: FollowBean
 lateinit var watchVideoBean: WatchVideoBean
+lateinit var cancelFollowBean: CancelFollowBean
