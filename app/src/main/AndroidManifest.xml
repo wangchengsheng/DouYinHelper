@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.hairong.douyinhelper">
 
+    <queries>
+        <package android:name="com.ss.android.ugc.aweme" />
+    </queries>
+
     <application
         android:name="App"
         android:allowBackup="true"
