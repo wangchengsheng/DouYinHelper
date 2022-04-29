@@ -6,18 +6,14 @@ import com.hairong.douyinhelper.util.*
 import kotlinx.coroutines.delay
 import kotlin.random.Random
 
-class WatchVideoHelper(service: DouYinHelperService) : BaseHelper(service) {
+class SameCityHelper(service: DouYinHelperService) : BaseHelper(service) {
 
-    private var needSearch = true
     private var commentList: List<String>? = null
     private var count = 0
+    private val keyWork by lazy(LazyThreadSafetyMode.NONE) { watchVideoBean.searchKey.split(",") }
 
     override suspend fun execute() {
-        if (needSearch) {
-            needSearch = false
-            search()
-        }
-        if (!isAdv() && !hasLike()) {
+        if (!isAdvNoKeyWord() && !hasLike()) {
             seeVideo()
         } else {
             log("跳过视频")
@@ -30,56 +26,34 @@ class WatchVideoHelper(service: DouYinHelperService) : BaseHelper(service) {
         }
     }
 
-    private suspend fun search() {
-        action {
-            nodeInfo.findId("com.ss.android.ugc.aweme:id/eso").click()
-                .also { if (!it) log("请回到首页") else log("开始搜索关键字") }
-        }
-        delay(3000)
-        action {
-            nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/et_search_kw")
-                .setText(watchVideoBean.searchKey)
-        }
-        action {
-            nodeInfo.findId("com.ss.android.ugc.aweme:id/p=_").gestureClick()
-        }
-        log("搜索成功")
-        action {
-            val list = nodeInfo?.findAccessibilityNodeInfosByViewId("android:id/text1")
-            list?.firstOrNull { it.text == "视频" }?.parent.click()
-        }
-        action { nodeInfo.findId("com.ss.android.ugc.aweme:id/l=a").click() }
-        log("开始浏览视频")
-    }
-
     private suspend fun seeVideo() {
         val time = Random.nextInt(15, 21)
         log("已浏览${count}个，浏览视频${time}秒")
         delay(time * 1000L)
-        if (isFollow()) follow()
+//        if (isFollow()) follow()
         if (isLike()) like()
         if (isComment()) comment()
         count++
         nextVideo()
     }
 
-    private suspend fun follow() {
-        log("关注主播")
-        action { nodeInfo.findId("com.ss.android.ugc.aweme:id/user_avatar").click() }
-        val followType = action {
-            val no = nodeInfo.findId("com.ss.android.ugc.aweme:id/k8u")
-            val yes = nodeInfo.findId("com.ss.android.ugc.aweme:id/k8v")
-            when {
-                no != null -> 1 to no
-                yes != null -> 2 to null
-                else -> null
-            }
-        }
-        if (followType.first == 1) followType.second.click()
-        log("关注完成")
-        delay(2000)
-        action { back() }
-    }
+//    private suspend fun follow() {
+//        log("关注主播")
+//        action { nodeInfo.findId("com.ss.android.ugc.aweme:id/user_avatar").click() }
+//        val followType = action {
+//            val no = nodeInfo.findId("com.ss.android.ugc.aweme:id/k8u")
+//            val yes = nodeInfo.findId("com.ss.android.ugc.aweme:id/k8v")
+//            when {
+//                no != null -> 1 to no
+//                yes != null -> 2 to null
+//                else -> null
+//            }
+//        }
+//        if (followType.first == 1) followType.second.click()
+//        log("关注完成")
+//        delay(2000)
+//        action { back() }
+//    }
 
     private suspend fun like() {
         log("点赞视频")
@@ -135,14 +109,44 @@ class WatchVideoHelper(service: DouYinHelperService) : BaseHelper(service) {
         action {
             nodeInfo.findId("com.ss.android.ugc.aweme:id/viewpager").gestureForward()
         }
+        log("开始下一个视频")
     }
 
-    private suspend fun isAdv(): Boolean {
-        val text = action {
-            nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/desc")
-                ?.firstOrNull { it.isVisibleToUser }
+    private suspend fun isAdvNoKeyWord(): Boolean {
+        var tryTime = 0
+        val skip = action {
+            val des =
+                nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/desc")
+                    ?.firstOrNull { it.isVisibleToUser }
+            val live =
+                nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/pu2")
+                    ?.firstOrNull { it.isVisibleToUser }
+            if (des != null) {
+                val text = des.text.toString()
+                when {
+                    text.endsWith("广告") -> {
+                        loge("广告")
+                        0 to null
+                    }
+                    keyWork.any { text.contains(it) } -> {
+                        loge("包含关键字")
+                        1 to null
+                    }
+                    else -> {
+                        0 to null
+                    }
+                }
+            } else if (live != null && live.text.contains("直播间")) {
+                loge("直播间")
+                0 to null
+            } else {
+                loge("啥也不是") // 描述为空
+                log("检测不到，准备跳过")
+                tryTime++
+                if (tryTime > 2) 0 to null else null
+            }
         }
-        return text.text.endsWith("广告")
+        return skip.first == 0
     }
 
     private suspend fun hasLike(): Boolean {

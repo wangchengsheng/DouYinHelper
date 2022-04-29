@@ -1,16 +1,17 @@
 package com.hairong.douyinhelper.helper
 
 import android.view.accessibility.AccessibilityNodeInfo
-import androidx.core.os.bundleOf
 import com.hairong.douyinhelper.data.configData
 import com.hairong.douyinhelper.data.followBean
 import com.hairong.douyinhelper.util.*
 import kotlinx.coroutines.delay
+import kotlin.random.Random
 
 class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
 
     private var index = 0
     private var count = 0
+    private var commentList: List<String>? = null
 
     override suspend fun execute() {
         val rv = followRv()
@@ -53,7 +54,7 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
                     actionItem(rv)
                 }
             }
-            text == "关注" -> {
+            text == "关注" || text == "回关" -> {
                 action {
                     item.click().takeIf { it }.also { log("已关注${count}个") }
                 }
@@ -67,48 +68,44 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
     }
 
     private suspend fun actionUserProfile() {
-        val type = action {
+        action {
             // 针对进来不是选中作品的情况
             nodeInfo.findId("com.ss.android.ugc.aweme:id/n4w")?.let {
                 if (it.childCount > 0) it.getChild(0).click() // 选中作品
             }
-            val noVideo = nodeInfo.hasText("作品 0")
-            val privacy = nodeInfo.hasText("关注帐号即可查看内容和喜欢")
-            val banUser = nodeInfo.hasText("帐号已被封禁")
-            val hasVideo = nodeInfo.findId("com.ss.android.ugc.aweme:id/iu6")
-            when {
-                hasVideo != null -> 1 to hasVideo
-                noVideo -> 2 to null
-                privacy -> 3 to null
-                banUser -> 4 to null
-                else -> null
+        }
+        val type = action {
+            val list =
+                nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/iu6")
+            val videoSize = list?.size ?: 0
+            loge("作品 $videoSize")
+            when (videoSize) {
+                0 -> {
+                    val lessVideo = nodeInfo.hasText("作品 0")
+                    val privacy = nodeInfo.hasText("关注帐号即可查看内容和喜欢")
+                    val banUser = nodeInfo.hasText("帐号已被封禁")
+                    if (lessVideo || privacy || banUser) {
+                        loge("需要跳过此账号 $lessVideo $privacy $banUser")
+                        2 to null
+                    } else null
+                }
+                in 3..Int.MAX_VALUE -> 1 to list?.firstOrNull()
+                else -> 2 to null
             }
         }
         when (type.first) {
             1 -> {
-                action { type.second.click().also { if (it) log("开始浏览视频一小会") } }
+                action { type.second.click() }
                 actionVideo()
             }
-            2 -> {
-                log("作品 0")
-                if (followBean.skipVideo0) skipUser() else followUser(type.first)
-            }
-            3 -> {
-                log("私密账号")
-                if (followBean.skipPrivacy) skipUser() else followUser(type.first)
-            }
-            4 -> {
-                log("帐号已被封禁")
-                skipUser()
-            }
+            2 -> skipUser()
         }
     }
 
     /**
      * 关注用户
-     * [type] 3私密账号第一次关注后会弹窗
      */
-    private suspend fun followUser(type: Int) {
+    private suspend fun followUser() {
         delay(1000)
         log("关注用户")
         val follow = action { nodeInfo.findId("com.ss.android.ugc.aweme:id/k8u") }
@@ -116,15 +113,16 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
             if (action { follow.click() }) {
                 index++
                 count++
-                log("已关注${count}个，休息一会~")
-                delay(5000)
-                if (type == 3) {
-                    try {
-                        action(3000) { nodeInfo.hasText("对方已设置为私密帐号") }
-                        action { back() }
-                    } catch (e: Exception) {
-                    }
-                }
+                val time = Random.nextInt(5, 9)
+                log("已关注${count}个，休息 $time 秒")
+                delay(time * 1000L)
+//                if (type == 2) {
+//                    try {
+//                        action(2500) { nodeInfo.hasText("对方已设置为私密帐号") }
+//                        action { back() }
+//                    } catch (e: Exception) {
+//                    }
+//                }
             }
         }
         action { back() }
@@ -135,14 +133,16 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
      */
     private suspend fun skipUser() {
         index++
-        delay(3000)
+        delay(Random.nextInt(5) * 1000L)
         log("跳过此用户，休息一会~")
-        delay(3000)
+        delay(Random.nextInt(3) * 1000L)
         action { back() }
     }
 
     private suspend fun actionVideo() {
-        delay(8000)
+        val seeTime = Random.nextInt(8, 15)
+        log("开始浏览视频 $seeTime 秒")
+        delay(seeTime * 1000L)
         // 点赞
         log("开始点赞")
         val node1 = action { nodeInfo.findId("com.ss.android.ugc.aweme:id/c+p") }
@@ -153,18 +153,23 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
         log("评论")
         action { nodeInfo.findId("com.ss.android.ugc.aweme:id/cff").click() }
         delay(2000)
+        val text = if (followBean.customComment) {
+            if (commentList == null) {
+                commentList = followBean.commentText.split(',')
+            }
+            commentList!![Random.nextInt(commentList!!.size)]
+        } else {
+            followBean.commentList[Random.nextInt(followBean.commentList.size)]
+        }
         action {
-            val edit = nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cc4")
-            val bundle =
-                bundleOf(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE to followBean.comment)
-            edit?.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle) ?: false
+            nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cc4").setText(text)
         }
         delay(2000)
         action { nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cea").click() }
         log("评论成功")
         action { back() }
         action { back() }
-        followUser(1)
+        followUser()
     }
 
 }

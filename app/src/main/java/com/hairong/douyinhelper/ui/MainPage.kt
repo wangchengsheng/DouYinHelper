@@ -76,6 +76,9 @@ private fun Content(enabled: Boolean, show: (Int) -> Unit) {
                 Text(text = "浏览视频")
             }
             Button(onClick = { show(2) }, enabled = enabled) {
+                Text(text = "浏览同城")
+            }
+            Button(onClick = { show(3) }, enabled = enabled) {
                 Text(text = "取消关注")
             }
         }

@@ -73,7 +73,7 @@ suspend inline fun <T> action(
     while (!finished && configData.showLogWindow.value == true && isActive) {
         t = action()
         finished = if (t is Boolean) t else t != null
-        if (!finished) delay(1500)
+        if (!finished) delay(1000)
     }
     t!!
 }

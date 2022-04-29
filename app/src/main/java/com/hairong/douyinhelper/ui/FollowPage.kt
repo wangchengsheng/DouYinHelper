@@ -1,9 +1,6 @@
 package com.hairong.douyinhelper.ui
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -33,8 +30,8 @@ fun FollowPage(back: () -> Unit) {
                 text = count.toString()
                 followBean.followCount = count
             }
-            CommentText()
-            SkipConfigs()
+            CommentType()
+//            SkipConfigs()
             StartRun()
         }
     }
@@ -71,30 +68,55 @@ fun NeedCount(modifier: Modifier = Modifier, label: String, text: String, change
 }
 
 @Composable
-private fun CommentText() {
-    var text by remember { mutableStateOf(followBean.comment) }
-    TextField(
-        value = text,
-        onValueChange = {
-            text = it
-            followBean.comment = text
-        },
-        label = { Text(text = "评论内容") },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-    )
+private fun CommentType() {
+    var select by remember { mutableStateOf(0) }
+    val text = remember { arrayOf("自定义评论", "智能评论") }
+    Row {
+        for (i in text.indices) {
+            RadioText(text[i], selected = select == i) {
+                select = i
+                followBean.customComment = select == 0
+            }
+        }
+    }
+    if (select == 0) {
+        var input by remember { mutableStateOf(followBean.commentText) }
+        TextField(
+            value = input,
+            onValueChange = {
+                input = it
+                followBean.commentText = it
+            },
+            label = { Text(text = "评论内容(”,“隔开)") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+        )
+    }
 }
+//@Composable
+//private fun CommentText() {
+//    var text by remember { mutableStateOf(followBean.comment) }
+//    TextField(
+//        value = text,
+//        onValueChange = {
+//            text = it
+//            followBean.comment = text
+//        },
+//        label = { Text(text = "评论内容(”,“隔开)") },
+//        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+//    )
+//}
 
 @Composable
 private fun SkipConfigs() {
     var skip1 by remember { mutableStateOf(true) }
-    CheckItem(text = "跳过0作品", checked = skip1) {
+    CheckItem(text = "跳过低于3作品", checked = skip1) {
         skip1 = it
-        followBean.skipVideo0 = skip1
+//        followBean.skipVideo3 = skip1
     }
     var skip2 by remember { mutableStateOf(true) }
     CheckItem(text = "跳过私密账号", checked = skip2) {
         skip2 = it
-        followBean.skipPrivacy = skip2
+//        followBean.skipPrivacy = skip2
     }
 }
 
