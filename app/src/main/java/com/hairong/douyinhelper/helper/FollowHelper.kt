@@ -68,17 +68,18 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
     }
 
     private suspend fun actionUserProfile() {
-        action {
-            // 针对进来不是选中作品的情况
-            nodeInfo.findId("com.ss.android.ugc.aweme:id/n4w")?.let {
-                if (it.childCount > 0) it.getChild(0).click() // 选中作品
-            }
-        }
+//        action {
+//            // 针对进来不是选中作品的情况
+//            nodeInfo.findId("com.ss.android.ugc.aweme:id/n4w")?.let {
+//                if (it.childCount > 0) it.getChild(0).click() // 选中作品
+//            }
+//        }
+        var tryTime = 0
         val type = action {
             val list =
                 nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/iu6")
             val videoSize = list?.size ?: 0
-            loge("作品 $videoSize")
+            loge("size $videoSize")
             when (videoSize) {
                 0 -> {
                     val lessVideo = nodeInfo.hasText("作品 0")
@@ -87,7 +88,10 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
                     if (lessVideo || privacy || banUser) {
                         loge("需要跳过此账号 $lessVideo $privacy $banUser")
                         2 to null
-                    } else null
+                    } else {
+                        tryTime++
+                        if (tryTime > 6) 2 to null else null
+                    }
                 }
                 in 3..Int.MAX_VALUE -> 1 to list?.firstOrNull()
                 else -> 2 to null
@@ -109,7 +113,8 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
         delay(1000)
         log("关注用户")
         val follow = action { nodeInfo.findId("com.ss.android.ugc.aweme:id/k8u") }
-        if (follow.text.toString() == "关注") {
+        val text = follow.text.toString()
+        if (text == "关注" || text == "回关") {
             if (action { follow.click() }) {
                 index++
                 count++
