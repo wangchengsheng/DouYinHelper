@@ -32,7 +32,7 @@ fun MainPage(show: (Int) -> Unit) {
         owner.lifecycle.addObserver(observer)
         onDispose { owner.lifecycle.removeObserver(observer) }
     }
-    val needVersion = "20.4.0"
+    val needVersion = "20.5.0"
     if (douYinVersion != needVersion) {
         NotSupport(douYinVersion, needVersion)
     } else {

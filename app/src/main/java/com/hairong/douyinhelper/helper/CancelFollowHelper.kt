@@ -15,7 +15,7 @@ class CancelFollowHelper(service: DouYinHelperService) : BaseHelper(service) {
     }
 
     private suspend fun followRv() = action {
-        nodeInfo.findId("com.ss.android.ugc.aweme:id/l+z").also {
+        nodeInfo.findId("com.ss.android.ugc.aweme:id/mhy").also {
             if (it == null) {
                 log("请手动打开我的关注页")
             } else {
@@ -41,10 +41,10 @@ class CancelFollowHelper(service: DouYinHelperService) : BaseHelper(service) {
             index = 0
             delay(3000)
         } else {
-            if (cancelFollowBean.type == 0) {
-                actionCancel(item, rv)
-            }
-            val text = action { item.findId("com.ss.android.ugc.aweme:id/a71")?.text?.toString() }
+//            if (cancelFollowBean.type == 0) {
+//                actionCancel(item, rv)
+//            }
+            val text = action { item.findId("com.ss.android.ugc.aweme:id/a_q")?.text?.toString() }
             if (cancelFollowBean.type == 0 && text != "关注" && text != "回关") {
                 actionCancel(item, rv)
             } else if (cancelFollowBean.type == 1 && text != "互相关注") {
@@ -59,11 +59,11 @@ class CancelFollowHelper(service: DouYinHelperService) : BaseHelper(service) {
 
     private suspend fun actionCancel(item: AccessibilityNodeInfo, rv: AccessibilityNodeInfo) {
         log("正在取消")
-        if (action { item.findId("com.ss.android.ugc.aweme:id/qlc").click() }) {
+        if (action { item.findId("com.ss.android.ugc.aweme:id/qu1").click() }) {
             if (cancelFollowBean.type == 0) {
                 try {
                     // 回关取消无弹窗
-                    action(5000) { nodeInfo.findId("com.ss.android.ugc.aweme:id/a6c").click() }
+                    action(5000) { back() /*nodeInfo.findId("com.ss.android.ugc.aweme:id/a6c").click()*/ }
                 } catch (e: Exception) {
                 }
             }

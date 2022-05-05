@@ -73,16 +73,20 @@ class SameCityHelper(service: DouYinHelperService) : BaseHelper(service) {
             watchVideoBean.commentList[Random.nextInt(watchVideoBean.commentList.size)]
         }
         action {
-            nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/cff")
+            nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/ci4")
                 ?.firstOrNull { it.isVisibleToUser }.click()
         }
         delay(1500)
-        likeComment()
+        try {
+            likeComment()
+        } catch (e: Exception) {
+            loge("评论内容找不到")
+        }
         log("开始评论")
         action {
-            nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cc4").setText(text)
+            nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cgr").setText(text)
         }
-        action { nodeInfo.findId("com.ss.android.ugc.aweme:id/cea").click() }
+        action { nodeInfo.findId("com.ss.android.ugc.aweme:id/chy").click() }
         log("评论成功")
         delay(2000)
         action { back() }
@@ -92,8 +96,8 @@ class SameCityHelper(service: DouYinHelperService) : BaseHelper(service) {
         val nextInt = Random.nextInt(100)
         if (nextInt < 75) {
             log("点赞评论")
-            val likeList = action {
-                nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/c+i")
+            val likeList = action(8000) {
+                nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/ddc")
             }
             if (likeList.isNotEmpty()) {
                 action { likeList.firstOrNull().click() }
@@ -119,7 +123,7 @@ class SameCityHelper(service: DouYinHelperService) : BaseHelper(service) {
                 nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/desc")
                     ?.firstOrNull { it.isVisibleToUser }
             val live =
-                nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/pu2")
+                nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/p3+")
                     ?.firstOrNull { it.isVisibleToUser }
             if (des != null) {
                 val text = des.text.toString()
@@ -151,7 +155,7 @@ class SameCityHelper(service: DouYinHelperService) : BaseHelper(service) {
 
     private suspend fun hasLike(): Boolean {
         val like = action {
-            nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/c+p")
+            nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/ddj")
                 ?.firstOrNull { it.isVisibleToUser }
         }
         return like.contentDescription.startsWith("已点赞")
