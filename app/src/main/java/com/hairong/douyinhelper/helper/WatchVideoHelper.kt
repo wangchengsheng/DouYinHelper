@@ -53,7 +53,7 @@ class WatchVideoHelper(service: DouYinHelperService) : BaseHelper(service) {
     }
 
     private suspend fun seeVideo() {
-        val time = Random.nextInt(15, 21)
+        val time = Random.nextInt(configData.videoTimeStart, configData.videoTimeEnd + 1)
         log("已浏览${count}个，浏览视频${time}秒")
         delay(time * 1000L)
         if (isFollow()) follow()
@@ -109,10 +109,22 @@ class WatchVideoHelper(service: DouYinHelperService) : BaseHelper(service) {
             loge("评论内容找不到")
         }
         log("开始评论")
-        action {
+        try {
+            action(5000) { nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cgr").setText(text) }
+            log("设置评论内容成功")
+        } catch (e: Exception) {
+            // 首评弹窗会设置失败
+            log("设置评论内容失败")
+            back()
+            back()
+            delay(1500)
             nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cgr").setText(text)
         }
-        action { nodeInfo.findId("com.ss.android.ugc.aweme:id/chy").click() }
+        try {
+            action(3000) { nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/chy").click() }
+        } catch (e: Exception) {
+            log("点击发送失败")
+        }
         log("评论成功")
         delay(2000)
         action { back() }
@@ -135,7 +147,9 @@ class WatchVideoHelper(service: DouYinHelperService) : BaseHelper(service) {
     }
 
     private suspend fun nextVideo() {
-        log("准备浏览下一个视频")
+        val time = Random.nextInt(configData.restTimeStart, configData.restTimeEnd + 1)
+        log("休息$time 秒")
+        delay(time * 1000L)
         action {
             nodeInfo.findId("com.ss.android.ugc.aweme:id/viewpager").gestureForward()
         }

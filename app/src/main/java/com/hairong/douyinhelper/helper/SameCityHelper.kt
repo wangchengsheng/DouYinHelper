@@ -1,5 +1,6 @@
 package com.hairong.douyinhelper.helper
 
+import android.view.accessibility.AccessibilityNodeInfo
 import com.hairong.douyinhelper.data.configData
 import com.hairong.douyinhelper.data.watchVideoBean
 import com.hairong.douyinhelper.util.*
@@ -17,7 +18,7 @@ class SameCityHelper(service: DouYinHelperService) : BaseHelper(service) {
             seeVideo()
         } else {
             log("跳过视频")
-            delay(2000)
+            delay(1000)
             nextVideo()
         }
         if (count >= watchVideoBean.watchCount) {
@@ -27,33 +28,14 @@ class SameCityHelper(service: DouYinHelperService) : BaseHelper(service) {
     }
 
     private suspend fun seeVideo() {
-        val time = Random.nextInt(15, 21)
+        val time = Random.nextInt(configData.videoTimeStart, configData.videoTimeEnd + 1)
         log("已浏览${count}个，浏览视频${time}秒")
         delay(time * 1000L)
-//        if (isFollow()) follow()
         if (isLike()) like()
         if (isComment()) comment()
         count++
         nextVideo()
     }
-
-//    private suspend fun follow() {
-//        log("关注主播")
-//        action { nodeInfo.findId("com.ss.android.ugc.aweme:id/user_avatar").click() }
-//        val followType = action {
-//            val no = nodeInfo.findId("com.ss.android.ugc.aweme:id/k8u")
-//            val yes = nodeInfo.findId("com.ss.android.ugc.aweme:id/k8v")
-//            when {
-//                no != null -> 1 to no
-//                yes != null -> 2 to null
-//                else -> null
-//            }
-//        }
-//        if (followType.first == 1) followType.second.click()
-//        log("关注完成")
-//        delay(2000)
-//        action { back() }
-//    }
 
     private suspend fun like() {
         log("点赞视频")
@@ -83,10 +65,22 @@ class SameCityHelper(service: DouYinHelperService) : BaseHelper(service) {
             loge("评论内容找不到")
         }
         log("开始评论")
-        action {
+        try {
+            action(5000) { nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cgr").setText(text) }
+            log("设置评论内容成功")
+        } catch (e: Exception) {
+            // 首评弹窗会设置失败
+            log("设置评论内容失败")
+            back()
+            back()
+            delay(1500)
             nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cgr").setText(text)
         }
-        action { nodeInfo.findId("com.ss.android.ugc.aweme:id/chy").click() }
+        try {
+            action(3000) { nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/chy").click() }
+        } catch (e: Exception) {
+            log("点击发送失败")
+        }
         log("评论成功")
         delay(2000)
         action { back() }
@@ -109,7 +103,9 @@ class SameCityHelper(service: DouYinHelperService) : BaseHelper(service) {
     }
 
     private suspend fun nextVideo() {
-        log("准备浏览下一个视频")
+        val time = Random.nextInt(configData.restTimeStart, configData.restTimeEnd + 1)
+        log("休息$time 秒")
+        delay(time * 1000L)
         action {
             nodeInfo.findId("com.ss.android.ugc.aweme:id/viewpager").gestureForward()
         }

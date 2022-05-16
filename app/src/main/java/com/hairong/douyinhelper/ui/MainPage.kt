@@ -14,7 +14,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.hairong.douyinhelper.data.configData
 import com.hairong.douyinhelper.util.getAppVersionName
 import com.hairong.douyinhelper.util.isAccessibilitySettingsOn
-import com.hairong.douyinhelper.util.launchApp
 import com.hairong.douyinhelper.util.startAccessibilitySettings
 
 @Composable
@@ -69,6 +68,8 @@ private fun Content(enabled: Boolean, show: (Int) -> Unit) {
             AccessibilityState(enabled)
             Spacer(modifier = Modifier.size(12.dp))
             ActionTime()
+            VideoTime()
+            RestTime()
             Button(onClick = { show(0) }, enabled = enabled) {
                 Text(text = "智能关注")
             }
@@ -92,17 +93,79 @@ private fun ActionTime() {
         value = text,
         onValueChange = {
             text = it
-            text.toLongOrNull()?.let { time ->
-                if (time < 1000) {
-                    configData.actionDelay = 1000
-                } else {
-                    configData.actionDelay = time
-                }
+            text.toIntOrNull()?.let { time ->
+                configData.actionDelay = time
             }
         },
-        label = { Text(text = "执行操作的时间间隔(毫秒)") },
+        label = { Text(text = "执行操作的时间间隔(秒)") },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
     )
+}
+
+@Composable
+private fun VideoTime() {
+    Row {
+        var text by remember { mutableStateOf(configData.videoTimeStart.toString()) }
+        TextField(
+            value = text,
+            onValueChange = {
+                text = it
+                text.toIntOrNull()?.let { time ->
+                    configData.videoTimeStart = time
+                }
+            },
+            Modifier.weight(1f),
+            label = { Text(text = "浏览视频时间(秒)-起始") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        )
+        var text2 by remember { mutableStateOf(configData.videoTimeEnd.toString()) }
+        Spacer(modifier = Modifier.width(12.dp))
+        TextField(
+            value = text2,
+            onValueChange = {
+                text2 = it
+                text2.toIntOrNull()?.let { time ->
+                    configData.videoTimeEnd = time
+                }
+            },
+            Modifier.weight(1f),
+            label = { Text(text = "浏览视频时间(秒)-结束") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        )
+    }
+}
+
+@Composable
+private fun RestTime() {
+    Row {
+        var text by remember { mutableStateOf(configData.restTimeStart.toString()) }
+        TextField(
+            value = text,
+            onValueChange = {
+                text = it
+                text.toIntOrNull()?.let { time ->
+                    configData.restTimeStart = time
+                }
+            },
+            Modifier.weight(1f),
+            label = { Text(text = "休息时间(秒)-起始") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        )
+        var text2 by remember { mutableStateOf(configData.restTimeEnd.toString()) }
+        Spacer(modifier = Modifier.width(12.dp))
+        TextField(
+            value = text2,
+            onValueChange = {
+                text2 = it
+                text2.toIntOrNull()?.let { time ->
+                    configData.restTimeEnd = time
+                }
+            },
+            Modifier.weight(1f),
+            label = { Text(text = "休息时间(秒)-结束") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        )
+    }
 }
 
 @Composable

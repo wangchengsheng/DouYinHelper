@@ -14,21 +14,46 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
     private var commentList: List<String>? = null
 
     override suspend fun execute() {
-        val rv = followRv()
-        actionItem(rv)
+        actionItem()
         actionUserProfile()
         if (count >= followBean.followCount) {
             configData.showLogWindow.value = false
         }
     }
 
-    private suspend fun followRv() = action {
-        nodeInfo.findId("com.ss.android.ugc.aweme:id/mhy").also {
-            if (it == null) {
-                log("请手动打开指定作者粉丝页")
-            } else {
-                log("当前是粉丝页面")
+    private suspend fun actionItem() {
+        log("开始查找item")
+        val textList = action {
+            nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/a_q")
+        }
+        log("text size ${textList.size}")
+        if (index > textList.size - 1) {
+            log("下一页")
+            nextPage()
+            index = 0
+            log("下一页成功，等待2秒")
+            delay(2000)
+            actionItem()
+        } else {
+            val textInfo = textList[index]
+            val text = textInfo.text.toString()
+            when (text) {
+                "关注", "回关" -> {
+                    textInfo.parent.parent.click()
+                    log("已关注${count}个")
+                }
+                else -> {
+                    log("跳过已关注")
+                    index++
+                    actionItem()
+                }
             }
+        }
+    }
+
+    private suspend fun nextPage() {
+        action {
+            nodeInfo.findId("com.ss.android.ugc.aweme:id/mhy").scrollForward()
         }
     }
 
@@ -42,10 +67,12 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
                 rv.refresh()
                 null
             } else {
+                log("获取索引$index")
                 rv.getChild(index)
             }
         }
         val text = action { item.findId("com.ss.android.ugc.aweme:id/a_q")?.text?.toString() }
+        log("找到text=$text")
         when {
             index >= rv.childCount - 1 -> {
                 if (action { rv.scrollForward() }) {
@@ -68,12 +95,6 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
     }
 
     private suspend fun actionUserProfile() {
-//        action {
-//            // 针对进来不是选中作品的情况
-//            nodeInfo.findId("com.ss.android.ugc.aweme:id/n4w")?.let {
-//                if (it.childCount > 0) it.getChild(0).click() // 选中作品
-//            }
-//        }
         var tryTime = 0
         val type = action {
             val list =
@@ -118,16 +139,9 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
             if (action { follow.click() }) {
                 index++
                 count++
-                val time = Random.nextInt(5, 9)
+                val time = Random.nextInt(configData.restTimeStart, configData.restTimeEnd + 1)
                 log("已关注${count}个，休息 $time 秒")
                 delay(time * 1000L)
-//                if (type == 2) {
-//                    try {
-//                        action(2500) { nodeInfo.hasText("对方已设置为私密帐号") }
-//                        action { back() }
-//                    } catch (e: Exception) {
-//                    }
-//                }
             }
         }
         action { back() }
@@ -138,14 +152,14 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
      */
     private suspend fun skipUser() {
         index++
-        delay(Random.nextInt(5) * 1000L)
-        log("跳过此用户，休息一会~")
-        delay(Random.nextInt(3) * 1000L)
+        val time = Random.nextInt(configData.restTimeStart, configData.restTimeEnd + 1)
+        log("跳过此用户，休息$time 秒")
+        delay(time * 1000L)
         action { back() }
     }
 
     private suspend fun actionVideo() {
-        val seeTime = Random.nextInt(8, 15)
+        val seeTime = Random.nextInt(configData.videoTimeStart, configData.videoTimeEnd + 1)
         log("开始浏览视频 $seeTime 秒")
         delay(seeTime * 1000L)
         // 点赞
@@ -166,11 +180,22 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
         } else {
             followBean.commentList[Random.nextInt(followBean.commentList.size)]
         }
-        action {
+        try {
+            action(5000) { nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cgr").setText(text) }
+            log("设置评论内容成功")
+        } catch (e: Exception) {
+            // 首评弹窗会设置失败
+            log("设置评论内容失败")
+            back()
+            back()
+            delay(1500)
             nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cgr").setText(text)
         }
-        delay(2000)
-        action { nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/chy").click() }
+        try {
+            action(3000) { nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/chy").click() }
+        } catch (e: Exception) {
+            log("点击发送失败")
+        }
         log("评论成功")
         action { back() }
         action { back() }

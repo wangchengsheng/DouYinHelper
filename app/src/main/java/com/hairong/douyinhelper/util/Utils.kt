@@ -1,5 +1,8 @@
 package com.hairong.douyinhelper.util
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import android.text.TextUtils
@@ -47,10 +50,10 @@ fun isAccessibilitySettingsOn(): Boolean {
     return false
 }
 
-//fun copyText(text: String) {
-//    val cm = appContext.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-//    cm.setPrimaryClip(ClipData.newPlainText(appContext.packageName, text))
-//}
+fun copyText(text: String) {
+    val cm = appContext.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    cm.setPrimaryClip(ClipData.newPlainText(appContext.packageName, text))
+}
 
 fun launchApp(packageName: String = "com.ss.android.ugc.aweme") {
     val intent = appContext.packageManager.getLaunchIntentForPackage(packageName)?.apply {
@@ -64,7 +67,7 @@ fun launchApp(packageName: String = "com.ss.android.ugc.aweme") {
 }
 
 suspend inline fun <T> action(
-    timeMillis: Long = if (configData.actionDelay >= 5000) configData.actionDelay * 6 else 30000,
+    timeMillis: Long = if (configData.actionDelay * 1000L >= 5000) configData.actionDelay * 1000L * 6 else 30000,
     crossinline action: suspend () -> T?
 ) = withTimeout(timeMillis) {
     delayTime()
@@ -78,7 +81,7 @@ suspend inline fun <T> action(
     t!!
 }
 
-suspend fun delayTime() = delay(configData.actionDelay)
+suspend fun delayTime() = delay(configData.actionDelay * 1000L)
 
 fun AccessibilityNodeInfo?.findId(id: String) =
     this?.findAccessibilityNodeInfosByViewId(id)?.firstOrNull()
