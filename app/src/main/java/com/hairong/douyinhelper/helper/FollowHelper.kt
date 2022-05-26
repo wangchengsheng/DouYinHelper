@@ -24,7 +24,7 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
     private suspend fun actionItem() {
         log("开始查找item")
         val textList = action {
-            nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/a_q")
+            nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/a-+")
         }
         log("text size ${textList.size}")
         if (index > textList.size - 1) {
@@ -53,44 +53,7 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
 
     private suspend fun nextPage() {
         action {
-            nodeInfo.findId("com.ss.android.ugc.aweme:id/mhy").scrollForward()
-        }
-    }
-
-    /**
-     * 找到需要关注的item
-     */
-    private suspend fun actionItem(rv: AccessibilityNodeInfo) {
-        val item = action(1200000) {
-            if (rv.childCount <= 0) {
-                log("列表为空，正在刷新")
-                rv.refresh()
-                null
-            } else {
-                log("获取索引$index")
-                rv.getChild(index)
-            }
-        }
-        val text = action { item.findId("com.ss.android.ugc.aweme:id/a_q")?.text?.toString() }
-        log("找到text=$text")
-        when {
-            index >= rv.childCount - 1 -> {
-                if (action { rv.scrollForward() }) {
-                    index = 0
-                    delay(5000)
-                    actionItem(rv)
-                }
-            }
-            text == "关注" || text == "回关" -> {
-                action {
-                    item.click().takeIf { it }.also { log("已关注${count}个") }
-                }
-            }
-            text == "已关注" || text == "已请求" || item.hasText("进入他的主页")/*自己*/ -> {
-                log("跳过已关注")
-                index++
-                actionItem(rv)
-            }
+            nodeInfo.findId("com.ss.android.ugc.aweme:id/my9").scrollForward()
         }
     }
 
@@ -98,7 +61,7 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
         var tryTime = 0
         val type = action {
             val list =
-                nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/i1a")
+                nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/i+l")
             val videoSize = list?.size ?: 0
             loge("size $videoSize")
             when (videoSize) {
@@ -133,7 +96,7 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
     private suspend fun followUser() {
         delay(1000)
         log("关注用户")
-        val follow = action { nodeInfo.findId("com.ss.android.ugc.aweme:id/lbq") }
+        val follow = action { nodeInfo.findId("com.ss.android.ugc.aweme:id/lrd") }
         val text = follow.text.toString()
         if (text == "关注" || text == "回关") {
             if (action { follow.click() }) {
@@ -164,13 +127,13 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
         delay(seeTime * 1000L)
         // 点赞
         log("开始点赞")
-        val node1 = action { nodeInfo.findId("com.ss.android.ugc.aweme:id/ddj") }
+        val node1 = action { nodeInfo.findId("com.ss.android.ugc.aweme:id/did") }
         if (node1.hasText("未点赞")) {
             action { node1.click() }
         }
         // 评论
         log("评论")
-        action { nodeInfo.findId("com.ss.android.ugc.aweme:id/ci4").click() }
+        action { nodeInfo.findId("com.ss.android.ugc.aweme:id/cmt").click() }
         delay(2000)
         val text = if (followBean.customComment) {
             if (commentList == null) {
@@ -181,7 +144,7 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
             followBean.commentList[Random.nextInt(followBean.commentList.size)]
         }
         try {
-            action(5000) { nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cgr").setText(text) }
+            action(5000) { nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cj5").setText(text) }
             log("设置评论内容成功")
         } catch (e: Exception) {
             // 首评弹窗会设置失败
@@ -189,10 +152,10 @@ class FollowHelper(service: DouYinHelperService) : BaseHelper(service) {
             back()
             back()
             delay(1500)
-            nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cgr").setText(text)
+            nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cj5").setText(text)
         }
         try {
-            action(3000) { nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/chy").click() }
+            action(3000) { nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cli").click() }
         } catch (e: Exception) {
             log("点击发送失败")
         }

@@ -32,7 +32,7 @@ class WatchVideoHelper(service: DouYinHelperService) : BaseHelper(service) {
 
     private suspend fun search() {
         action {
-            nodeInfo.findId("com.ss.android.ugc.aweme:id/ew4").click()
+            nodeInfo.findId("com.ss.android.ugc.aweme:id/e5m").click()
                 .also { if (!it) log("请回到首页") else log("开始搜索关键字") }
         }
         delay(3000)
@@ -41,14 +41,14 @@ class WatchVideoHelper(service: DouYinHelperService) : BaseHelper(service) {
                 .setText(watchVideoBean.searchKey)
         }
         action {
-            nodeInfo.findId("com.ss.android.ugc.aweme:id/qgp").gestureClick()
+            nodeInfo.findId("com.ss.android.ugc.aweme:id/q1_").gestureClick()
         }
         log("搜索成功")
         action {
             val list = nodeInfo?.findAccessibilityNodeInfosByViewId("android:id/text1")
             list?.firstOrNull { it.text == "视频" }?.parent.click()
         }
-        action { nodeInfo.findId("com.ss.android.ugc.aweme:id/md_").click() }
+        action { nodeInfo.findId("com.ss.android.ugc.aweme:id/mvd").click() }
         log("开始浏览视频")
     }
 
@@ -67,8 +67,8 @@ class WatchVideoHelper(service: DouYinHelperService) : BaseHelper(service) {
         log("关注主播")
         action { nodeInfo.findId("com.ss.android.ugc.aweme:id/user_avatar").click() }
         val followType = action {
-            val no = nodeInfo.findId("com.ss.android.ugc.aweme:id/lbq")
-            val yes = nodeInfo.findId("com.ss.android.ugc.aweme:id/lbr")
+            val no = nodeInfo.findId("com.ss.android.ugc.aweme:id/lrd")
+            val yes = nodeInfo.findId("com.ss.android.ugc.aweme:id/lre")
             when {
                 no != null -> 1 to no
                 yes != null -> 2 to null
@@ -99,7 +99,7 @@ class WatchVideoHelper(service: DouYinHelperService) : BaseHelper(service) {
             watchVideoBean.commentList[Random.nextInt(watchVideoBean.commentList.size)]
         }
         action {
-            nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/ci4")
+            nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/cmt")
                 ?.firstOrNull { it.isVisibleToUser }.click()
         }
         delay(1500)
@@ -110,7 +110,7 @@ class WatchVideoHelper(service: DouYinHelperService) : BaseHelper(service) {
         }
         log("开始评论")
         try {
-            action(5000) { nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cgr").setText(text) }
+            action(5000) { nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cj5").setText(text) }
             log("设置评论内容成功")
         } catch (e: Exception) {
             // 首评弹窗会设置失败
@@ -118,10 +118,10 @@ class WatchVideoHelper(service: DouYinHelperService) : BaseHelper(service) {
             back()
             back()
             delay(1500)
-            nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cgr").setText(text)
+            nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cj5").setText(text)
         }
         try {
-            action(3000) { nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/chy").click() }
+            action(3000) { nodeInfo.findIdLast("com.ss.android.ugc.aweme:id/cli").click() }
         } catch (e: Exception) {
             log("点击发送失败")
         }
@@ -135,7 +135,7 @@ class WatchVideoHelper(service: DouYinHelperService) : BaseHelper(service) {
         if (nextInt < 75) {
             log("点赞评论")
             val likeList = action(8000) {
-                nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/ddc")
+                nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/dh9")
             }
             if (likeList.isNotEmpty()) {
                 action { likeList.firstOrNull().click() }
@@ -156,16 +156,21 @@ class WatchVideoHelper(service: DouYinHelperService) : BaseHelper(service) {
     }
 
     private suspend fun isAdv(): Boolean {
-        val text = action {
-            nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/desc")
-                ?.firstOrNull { it.isVisibleToUser }
+        val text = try {
+            action(3000) {
+                nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/desc")
+                    ?.firstOrNull { it.isVisibleToUser }
+            }
+        } catch (e: Exception) {
+            // 没有描述文本
+            return true
         }
         return text.text.endsWith("广告")
     }
 
     private suspend fun hasLike(): Boolean {
         val like = action {
-            nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/ddj")
+            nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/did")
                 ?.firstOrNull { it.isVisibleToUser }
         }
         return like.contentDescription.startsWith("已点赞")
