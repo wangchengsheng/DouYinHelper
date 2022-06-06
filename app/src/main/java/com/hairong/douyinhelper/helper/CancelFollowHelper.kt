@@ -56,12 +56,12 @@ class CancelFollowHelper(service: DouYinHelperService) : BaseHelper(service) {
         if (item.findId("com.ss.android.ugc.aweme:id/rc0").click()) {
             if (cancelFollowBean.type == 0) {
                 delay(800)
-                val dialogCancel = nodeInfo.findId("com.ss.android.ugc.aweme:id/a_m")
-                if (dialogCancel?.text?.toString() == "取消关注") {
-                    dialogCancel.click()
-                    // 等待dialog关闭
-                    delay(1000)
+                val textList = nodeInfo?.findAccessibilityNodeInfosByText("取消关注")
+                textList?.forEach {
+                    if (it.isClickable) it.click()
                 }
+                // 等待dialog关闭
+                delay(1000)
             }
             log("已取消, 休息0.5秒")
             delay(500)
