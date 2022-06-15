@@ -83,14 +83,14 @@ suspend inline fun <T> action(
 
 suspend fun delayTime() = delay(configData.actionDelay * 1000L)
 
-fun AccessibilityNodeInfo?.findId(id: String) =
-    this?.findAccessibilityNodeInfosByViewId(id)?.firstOrNull()
+fun AccessibilityNodeInfo?.findId(id: String, isVisibleToUser: Boolean = true) =
+    this?.findAccessibilityNodeInfosByViewId(id)?.firstOrNull { if (isVisibleToUser) it.isVisibleToUser else true }
 
 fun AccessibilityNodeInfo?.findIdLast(id: String) =
     this?.findAccessibilityNodeInfosByViewId(id)?.lastOrNull()
 
 fun AccessibilityNodeInfo?.hasText(text: String) =
-    this?.findAccessibilityNodeInfosByText(text)?.firstOrNull() != null
+    this?.findAccessibilityNodeInfosByText(text)?.firstOrNull { it.isVisibleToUser } != null
 
 fun AccessibilityNodeInfo?.click() =
     this?.performAction(AccessibilityNodeInfo.ACTION_CLICK) ?: false

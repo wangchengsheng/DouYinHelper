@@ -2,15 +2,10 @@ package com.hairong.douyinhelper.helper
 
 import android.view.accessibility.AccessibilityNodeInfo
 import com.hairong.douyinhelper.data.cancelFollowBean
-import com.hairong.douyinhelper.util.action
-import com.hairong.douyinhelper.util.click
-import com.hairong.douyinhelper.util.findId
-import com.hairong.douyinhelper.util.scrollForward
+import com.hairong.douyinhelper.util.*
 import kotlinx.coroutines.delay
 
-class CancelFollowHelper(service: DouYinHelperService) : BaseHelper(service) {
-
-    private var index = 0
+class CancelFollowHelper(private val service: DouYinHelperService) : BaseHelper(service) {
 
     override suspend fun execute() {
         actionItem()
@@ -19,41 +14,39 @@ class CancelFollowHelper(service: DouYinHelperService) : BaseHelper(service) {
     private suspend fun actionItem() {
         log("开始查找item")
         val textList =
-            nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/a-+")
+            nodeInfo?.findAccessibilityNodeInfosByViewId("com.ss.android.ugc.aweme:id/a+=")
+                ?.filter { it.isVisibleToUser }
+                ?.filter {
+                    val text = it.text.toString()
+                    if (cancelFollowBean.type == 0) {
+                        text == "已关注" || text == "互相关注"
+                    } else {
+                        text == "已关注"
+                    }
+                }
                 ?: return
 
-        log("text size ${textList.size}")
-        if (index > textList.size - 1) {
+        loge("textList size=${textList.size}")
+        if (textList.isEmpty()) {
             log("下一页")
             nextPage()
-            index = 0
             log("下一页成功，等待1秒")
             delay(1000)
             actionItem()
         } else {
-            val textInfo = textList[index]
-            val text = textInfo.text.toString()
-            if (cancelFollowBean.type == 0 && text != "关注" && text != "回关") {
-                actionCancel(textInfo.parent)
-            } else if (cancelFollowBean.type == 1 && text == "已关注") {
-                actionCancel(textInfo.parent)
-            } else {
-                log("跳过")
-                index++
-                actionItem()
-            }
+            actionCancel(textList.first().parent)
         }
     }
 
     private suspend fun nextPage() {
         action {
-            nodeInfo.findId("com.ss.android.ugc.aweme:id/my9").scrollForward()
+            nodeInfo.findId("com.ss.android.ugc.aweme:id/m42").scrollForward()
         }
     }
 
     private suspend fun actionCancel(item: AccessibilityNodeInfo) {
         log("正在取消")
-        if (item.findId("com.ss.android.ugc.aweme:id/rc0").click()) {
+        if (item.findId("com.ss.android.ugc.aweme:id/rkj").click()) {
             if (cancelFollowBean.type == 0) {
                 delay(1000)
                 val textList = nodeInfo?.findAccessibilityNodeInfosByText("取消关注")
@@ -61,13 +54,19 @@ class CancelFollowHelper(service: DouYinHelperService) : BaseHelper(service) {
                     if (it.isClickable) if (it.click()) {
                         // 等待dialog关闭
                         delay(2800)
+                        // dialog 关闭之后获取不到界面信息，手动切换一下界面
+                        if (nodeInfo.findId("com.ss.android.ugc.aweme:id/a+=") == null) {
+                            if (gestureAnyClick()) {
+                                delay(2000)
+                                action { back() }
+                            }
+                        }
                         return@forEach
                     }
                 }
             }
             log("已取消, 休息0.5秒")
             delay(500)
-            index++
             actionItem()
         }
     }

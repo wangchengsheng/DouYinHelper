@@ -7,7 +7,10 @@ import android.graphics.Rect
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.CallSuper
 import com.hairong.douyinhelper.util.loge
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 abstract class BaseHelper(private val service: DouYinHelperService) {
 
@@ -62,6 +65,17 @@ abstract class BaseHelper(private val service: DouYinHelperService) {
         getBoundsInScreen(rect)
         path.reset()
         path.moveTo(rect.centerX().toFloat(), rect.centerY().toFloat())
+        val gestureDescription = GestureDescription.Builder()
+            .addStroke(GestureDescription.StrokeDescription(path, 0, 80))
+            .build()
+        return service.dispatchGesture(gestureDescription, null, null)
+    }
+    /**
+     * 手势模拟点击
+     */
+    protected fun gestureAnyClick(): Boolean {
+        path.reset()
+        path.moveTo(100f, 1000f)
         val gestureDescription = GestureDescription.Builder()
             .addStroke(GestureDescription.StrokeDescription(path, 0, 80))
             .build()
